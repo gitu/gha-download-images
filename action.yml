@@ -27,4 +27,4 @@ outputs:
     description: "The number of files which a download has occured"
 runs:
   using: "docker"
-  image: "docker://ghcr.io/gitu/gha-download-images:1.0.0"
+  image: "docker://ghcr.io/gitu/gha-download-images:v1.0.0"
