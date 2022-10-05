@@ -9,7 +9,8 @@ import (
 	"path/filepath"
 	"regexp"
 	"strconv"
-	"strings"
+    "net/http"
+	"io"
 
 	"github.com/gobwas/glob"
 )
@@ -74,24 +75,58 @@ func doesFileMatch(path string, include string, exclude string) bool {
 	return false
 }
 
-func findAndReplace(path string, find string, replace string, regex bool) (bool, error) {
-	if find != replace {
+
+func downloadFile(filepath string, url string) (err error) {
+	out, err := os.Create(filepath)
+	if err != nil  {
+	  return err
+	}
+	defer out.Close()
+
+	resp, err := http.Get(url)
+	if err != nil {
+	  return err
+	}
+	defer resp.Body.Close()
+	if resp.StatusCode != http.StatusOK {
+	  return fmt.Errorf("bad status: %s", resp.Status)
+	}
+  
+	_, err = io.Copy(out, resp.Body)
+	if err != nil  {
+	  return err
+	}
+  
+	return nil
+}
+
+func findAndReplace(path string, find string, target string, replace bool) (bool, error) {
+	if find != target {
 		read, readErr := ioutil.ReadFile(path)
 		check(readErr)
 
-		var newContents = ""
-		if regex {
-			re := regexp.MustCompile(find)
-			newContents = re.ReplaceAllString(string(read), replace)
-		} else {
-			newContents = strings.ReplaceAll(string(read), find, replace)
+		newContents := ""
+		re := regexp.MustCompile(find)
+
+		targetDir := filepath.Dir(path)
+		matches := re.FindAllString(string(read), -1)
+		for _, v := range matches {
+			newTarget := filepath.Join(targetDir, re.ReplaceAllString(v, target))
+			fmt.Println(v + "-->" + newTarget)
+			downloadErr := downloadFile(newTarget, v)
+			check(downloadErr)
 		}
 
-		if newContents != string(read) {
-			writeErr := ioutil.WriteFile(path, []byte(newContents), 0)
-			check(writeErr)
-			return true, nil
+		if replace {
+			newContents = re.ReplaceAllString(string(read), target)
+			if newContents != string(read) {
+				writeErr := ioutil.WriteFile(path, []byte(newContents), 0)
+				check(writeErr)
+				return true, nil
+			}
 		}
+		
+		return len(matches)>0, nil
 	}
 
 	return false, nil
@@ -101,19 +136,19 @@ func main() {
 	include, _ := getenvStr("INPUT_INCLUDE")
 	exclude, _ := getenvStr("INPUT_EXCLUDE")
 	find, findErr := getenvStr("INPUT_FIND")
-	replace, replaceErr := getenvStr("INPUT_REPLACE")
-	regex, regexErr := getenvBool("INPUT_REGEX")
+	target, targetErr := getenvStr("INPUT_TARGET")
+	replace, replaceErr := getenvBool("INPUT_REPLACE")
 
 	if findErr != nil {
-		panic(errors.New("gha-find-replace: expected with.find to be a string"))
+		panic(errors.New("gha-download-images: expected with.find to be a string"))
+	}
+
+	if targetErr != nil {
+		panic(errors.New("gha-download-images: expected with.replace to be a string"))
 	}
 
 	if replaceErr != nil {
-		panic(errors.New("gha-find-replace: expected with.replace to be a string"))
-	}
-
-	if regexErr != nil {
-		regex = true
+		replace = true
 	}
 
 	files, filesErr := listFiles(include, exclude)
@@ -122,7 +157,7 @@ func main() {
 	modifiedCount := 0
 
 	for _, path := range files {
-		modified, findAndReplaceErr := findAndReplace(path, find, replace, regex)
+		modified, findAndReplaceErr := findAndReplace(path, find, target, replace)
 		check(findAndReplaceErr)
 
 		if modified {

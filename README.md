@@ -1,8 +1,8 @@
 # Find and Replace Action
 
-[![GitHub Marketplace](https://img.shields.io/badge/Marketplace-Find%20and%20Replace-blue.svg?colorA=24292e&colorB=0366d6&style=flat&longCache=true&logo=data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAA4AAAAOCAYAAAAfSC3RAAAABHNCSVQICAgIfAhkiAAAAAlwSFlzAAAM6wAADOsB5dZE0gAAABl0RVh0U29mdHdhcmUAd3d3Lmlua3NjYXBlLm9yZ5vuPBoAAAERSURBVCiRhZG/SsMxFEZPfsVJ61jbxaF0cRQRcRJ9hlYn30IHN/+9iquDCOIsblIrOjqKgy5aKoJQj4O3EEtbPwhJbr6Te28CmdSKeqzeqr0YbfVIrTBKakvtOl5dtTkK+v4HfA9PEyBFCY9AGVgCBLaBp1jPAyfAJ/AAdIEG0dNAiyP7+K1qIfMdonZic6+WJoBJvQlvuwDqcXadUuqPA1NKAlexbRTAIMvMOCjTbMwl1LtI/6KWJ5Q6rT6Ht1MA58AX8Apcqqt5r2qhrgAXQC3CZ6i1+KMd9TRu3MvA3aH/fFPnBodb6oe6HM8+lYHrGdRXW8M9bMZtPXUji69lmf5Cmamq7quNLFZXD9Rq7v0Bpc1o/tp0fisAAAAASUVORK5CYII=)](https://github.com/jacobtomlinson/gha-find-replace)
-[![Actions Status](https://github.com/jacobtomlinson/gha-find-replace/workflows/Build/badge.svg)](https://github.com/jacobtomlinson/gha-find-replace/actions)
-[![Actions Status](https://github.com/jacobtomlinson/gha-find-replace/workflows/Integration%20Test/badge.svg)](https://github.com/jacobtomlinson/gha-find-replace/actions)
+[![GitHub Marketplace](https://img.shields.io/badge/Marketplace-Find%20and%20Replace-blue.svg?colorA=24292e&colorB=0366d6&style=flat&longCache=true&logo=data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAA4AAAAOCAYAAAAfSC3RAAAABHNCSVQICAgIfAhkiAAAAAlwSFlzAAAM6wAADOsB5dZE0gAAABl0RVh0U29mdHdhcmUAd3d3Lmlua3NjYXBlLm9yZ5vuPBoAAAERSURBVCiRhZG/SsMxFEZPfsVJ61jbxaF0cRQRcRJ9hlYn30IHN/+9iquDCOIsblIrOjqKgy5aKoJQj4O3EEtbPwhJbr6Te28CmdSKeqzeqr0YbfVIrTBKakvtOl5dtTkK+v4HfA9PEyBFCY9AGVgCBLaBp1jPAyfAJ/AAdIEG0dNAiyP7+K1qIfMdonZic6+WJoBJvQlvuwDqcXadUuqPA1NKAlexbRTAIMvMOCjTbMwl1LtI/6KWJ5Q6rT6Ht1MA58AX8Apcqqt5r2qhrgAXQC3CZ6i1+KMd9TRu3MvA3aH/fFPnBodb6oe6HM8+lYHrGdRXW8M9bMZtPXUji69lmf5Cmamq7quNLFZXD9Rq7v0Bpc1o/tp0fisAAAAASUVORK5CYII=)](https://github.com/gitu/gha-download-images)
+[![Actions Status](https://github.com/gitu/gha-download-images/workflows/Build/badge.svg)](https://github.com/gitu/gha-download-images/actions)
+[![Actions Status](https://github.com/gitu/gha-download-images/workflows/Integration%20Test/badge.svg)](https://github.com/gitu/gha-download-images/actions)
 
 This action will find and replace strings in your project files.
 
@@ -20,23 +20,26 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
+      - name: Download Images
+        uses: gitu/gha-download-images@v1
+        with:
+          find: "https://imgur.xx/([^.]+).png"
+          target: "$1.png"
       - name: Find and Replace
         uses: jacobtomlinson/gha-find-replace@v2
         with:
-          find: "hello"
-          replace: "world"
-          regex: false
+          find: "https://imgur.xx/([^.]+).png"
+          replace: "$1.png"
 ```
 
 ### Inputs
 
 | Input                  | Description                                                                                                                            |
 | ---------------------- | -------------------------------------------------------------------------------------------------------------------------------------- |
-| `find`                 | A string to find and replace in your project files. _(Defaults to a [regular expression](https://github.com/google/re2/wiki/Syntax).)_ |
-| `replace`              | The string to replace it with.                                                                                                         |
+| `find`                 | A string to find and replace in your project files. _(A [regular expression](https://github.com/google/re2/wiki/Syntax).)_             |
+| `target`               | The target file, relativ to the file the regex was found in.                                                                           |
 | `include` _(optional)_ | A glob of files to include. _Defaults to `**`._                                                                                        |
 | `exclude` _(optional)_ | A glob of files to exclude. _Defaults to `.git/**` ._                                                                                  |
-| `regex` _(optional)_   | Whether to match with.find as a regular expression instead of a fixed string. _Defaults to `true`._                                    |
 
 ### Outputs
 
@@ -59,12 +62,11 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - name: Find and Replace
-        uses: jacobtomlinson/gha-find-replace@v2
+        uses: gitu/gha-download-images@v1
         with:
-          find: "hello"
-          replace: "world"
+          find: "https://imgur.xx/([^.]+).png"
+          target: "$1.png"
           include: "justthisdirectory/**"
-          regex: true
 ```
 
 ### Filter by file name
@@ -79,11 +81,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - name: Find and Replace
-        uses: jacobtomlinson/gha-find-replace@v2
+      - name: Download Images
+        uses: gitu/gha-download-images@v1
         with:
-          find: "hello"
-          replace: "world"
+          find: "https://imgur.xx/([^.]+).png"
+          target: "$1.png"
           include: "**README.md" # Will match all README.md files in any nested directory
 ```
 
@@ -100,10 +102,10 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - name: Find and Replace
-        uses: jacobtomlinson/gha-find-replace@v2
+        uses: gitu/gha-download-images@v1
         with:
-          find: "hello"
-          replace: "world"
+          find: "https://imgur.xx/([^.]+).png"
+          target: "$1.png"
           exclude: "**/*.py" # Do not modify Python files
 ```
 

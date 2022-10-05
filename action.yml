@@ -1,6 +1,6 @@
-name: "Find and Replace"
-description: "Find and replace a string in your project files"
-author: "Jacob Tomlinson"
+name: "Download Images"
+description: "Find images by url and download them in your build"
+author: "Florian Schrag"
 inputs:
   include:
     description: "A glob of files to include in our find and replace"
@@ -11,17 +11,17 @@ inputs:
     default: ".git/**" # Ignore the `.git` directory by default
     required: false
   find:
-    description: "The regular expression (or fixed string) we want to replace"
+    description: "The regular expression (or fixed string) we want to fetch"
+    required: true
+  target:
+    description: "The target file to fetch to it"
     required: true
   replace:
-    description: "The new string to replace with"
-    required: true
-  regex:
-    description: "Whether to match with.find as a regular expression instead of a fixed string"
+    description: "also replace with target url in file - default is true"
     required: false
 outputs:
   modifiedFiles:
-    description: "The number of files which have been modified"
+    description: "The number of files which a download has occured"
 runs:
   using: "docker"
-  image: "docker://ghcr.io/jacobtomlinson/gha-find-replace:2.0.0"
+  image: "docker://ghcr.io/gitu/gha-download-images:1.0.0"

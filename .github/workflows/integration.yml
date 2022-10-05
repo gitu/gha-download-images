@@ -1,7 +1,7 @@
 name: Integration Test
 on: [push, pull_request]
 jobs:
-  build:
+  integration:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -14,9 +14,13 @@ jobs:
         uses: ./
         with:
           include: "test/**"
-          find: "world"
-          replace: "there"
-      - name: Check outputs and modified files
+          find: "https://avatars.githubusercontent.com/u/([0-9]+)\\?v=4"
+          target: "$1.png"
+      - name: Check outputs and modified files a
+        run: test "${{ steps.selftest.outputs.modifiedFiles }}" == "1"
+      - name: Check outputs and modified files b
         run: |
-          test "${{ steps.selftest.outputs.modifiedFiles }}" == "1"
-          grep "Hello there" test/hello.txt
+          ls test
+          test -f test/1056435.png
+      - name: Check outputs and modified files c
+        run: grep "hello 1056435.png !" test/hello.txt
