@@ -74,23 +74,18 @@ func doesFileMatch(path string, include string, exclude string) bool {
 	return false
 }
 
-func findAndReplace(path string, find string, replace string, regex bool) (bool, error) {
+func findAndReplace(path string, find string, replace string) (bool, error) {
 	if find != replace {
 		read, readErr := ioutil.ReadFile(path)
 		check(readErr)
 
 		var newContents = ""
-		if regex {
-			re := regexp.MustCompile(find)
-			newContents = re.ReplaceAllString(string(read), replace)
-		} else {
-			newContents = strings.ReplaceAll(string(read), find, replace)
-		}
 
-		if newContents != string(read) {
-			writeErr := ioutil.WriteFile(path, []byte(newContents), 0)
-			check(writeErr)
-			return true, nil
+		re := regexp.MustCompile(find)
+
+		matches := re.FindAllString(string(read), -1)
+		for _, v := range matches {
+			fmt.Println(v + "-->" + r.ReplaceAllString(v, replace))
 		}
 	}
 
@@ -101,8 +96,7 @@ func main() {
 	include, _ := getenvStr("INPUT_INCLUDE")
 	exclude, _ := getenvStr("INPUT_EXCLUDE")
 	find, findErr := getenvStr("INPUT_FIND")
-	replace, replaceErr := getenvStr("INPUT_REPLACE")
-	regex, regexErr := getenvBool("INPUT_REGEX")
+	replace, replaceErr := getenvStr("INPUT_TARGET")
 
 	if findErr != nil {
 		panic(errors.New("gha-find-replace: expected with.find to be a string"))
@@ -112,17 +106,13 @@ func main() {
 		panic(errors.New("gha-find-replace: expected with.replace to be a string"))
 	}
 
-	if regexErr != nil {
-		regex = true
-	}
-
 	files, filesErr := listFiles(include, exclude)
 	check(filesErr)
 
 	modifiedCount := 0
 
 	for _, path := range files {
-		modified, findAndReplaceErr := findAndReplace(path, find, replace, regex)
+		modified, findAndReplaceErr := findAndReplace(path, find, replace)
 		check(findAndReplaceErr)
 
 		if modified {
