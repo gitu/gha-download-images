@@ -85,7 +85,7 @@ func findAndReplace(path string, find string, replace string) (bool, error) {
 
 		matches := re.FindAllString(string(read), -1)
 		for _, v := range matches {
-			fmt.Println(v + "-->" + r.ReplaceAllString(v, replace))
+			fmt.Println(v + "-->" + re.ReplaceAllString(v, replace))
 		}
 	}
 
