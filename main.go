@@ -101,7 +101,7 @@ func downloadFile(filepath string, url string) (err error) {
 }
 
 func findAndReplace(path string, find string, target string, replace bool) (bool, error) {
-	if find != replace {
+	if find != target {
 		read, readErr := ioutil.ReadFile(path)
 		check(readErr)
 
@@ -144,7 +144,7 @@ func main() {
 		panic(errors.New("gha-download-images: expected with.replace to be a string"))
 	}
 
-	if regexErr != nil {
+	if replaceErr != nil {
 		replace = true
 	}
 
