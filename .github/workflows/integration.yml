@@ -19,6 +19,8 @@ jobs:
       - name: Check outputs and modified files a
         run: test "${{ steps.selftest.outputs.modifiedFiles }}" == "1"
       - name: Check outputs and modified files b
-        run: test -f test/1056435.png
+        run: |
+          ls test
+          test -f test/1056435.png
       - name: Check outputs and modified files c
-        run: grep "hello 1056435?.png !" test/hello.txt
+        run: grep "hello 1056435.png !" test/hello.txt
