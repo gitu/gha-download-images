@@ -78,8 +78,6 @@ func findAndReplace(path string, find string, replace string) (bool, error) {
 		read, readErr := ioutil.ReadFile(path)
 		check(readErr)
 
-		var newContents = ""
-
 		re := regexp.MustCompile(find)
 
 		matches := re.FindAllString(string(read), -1)
