@@ -1,7 +1,9 @@
 name: "Download urls by regex and replace"
 description: "Find images by url and download them in your build"
 author: "Florian Schrag"
-icon: download
+branding:
+  icon: 'download'  
+  color: 'purple'
 inputs:
   include:
     description: "A glob of files to include in our find and replace"
