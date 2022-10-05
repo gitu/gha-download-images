@@ -14,10 +14,10 @@ jobs:
         uses: ./
         with:
           include: "test/**"
-          find: "https://avatars.githubusercontent.com/u/(0-9+)?v=4"
+          find: "https://avatars.githubusercontent.com/u/([0-9]+)\?v=4"
           target: "$1.png"
       - name: Check outputs and modified files
         run: |
+          test -f test/1056435.pngc
           test "${{ steps.selftest.outputs.modifiedFiles }}" == "1"
-          test -f test/1056435.png
           grep "hello 1056435?.png !" test/hello.txt
