@@ -9,7 +9,6 @@ import (
 	"path/filepath"
 	"regexp"
 	"strconv"
-	"strings"
 
 	"github.com/gobwas/glob"
 )
