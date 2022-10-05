@@ -16,6 +16,9 @@ inputs:
   target:
     description: "The target file to fetch to it"
     required: true
+  replace:
+    description: "also replace with target url in file - default is true"
+    required: false
 outputs:
   modifiedFiles:
     description: "The number of files which a download has occured"
