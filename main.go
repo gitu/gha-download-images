@@ -105,12 +105,15 @@ func findAndReplace(path string, find string, target string, replace bool) (bool
 		read, readErr := ioutil.ReadFile(path)
 		check(readErr)
 
-		var newContents = ""
+		newContents := ""
 		re := regexp.MustCompile(find)
 
+		targetDir := filepath.Dir(path)
 		matches := re.FindAllString(string(read), -1)
 		for _, v := range matches {
-			downloadErr := downloadFile(re.ReplaceAllString(v, target), v)
+			newTarget := filepath.Join(targetDir, re.ReplaceAllString(v, target))
+			fmt.Println(v + "-->" + newTarget)
+			downloadErr := downloadFile(newTarget, v)
 			check(downloadErr)
 		}
 
