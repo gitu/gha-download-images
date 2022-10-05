@@ -18,6 +18,6 @@ jobs:
           target: "$1.png"
       - name: Check outputs and modified files
         run: |
-          test "${{ steps.selftest.outputs.fetchedImages }}" == "1"
+          test "${{ steps.selftest.outputs.modifiedFiles }}" == "1"
           test -f test/1056435.png
           grep "hello 1056435?.png !" test/hello.txt
