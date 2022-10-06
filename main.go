@@ -1,8 +1,11 @@
 package main
 
 import (
+	"bytes"
 	"errors"
 	"fmt"
+	"image"
+	"io"
 	"io/ioutil"
 	"log"
 	"os"
@@ -10,7 +13,6 @@ import (
 	"regexp"
 	"strconv"
     "net/http"
-	"io"
 
 	"github.com/gobwas/glob"
 	"github.com/scottleedavis/go-exif-remove"
