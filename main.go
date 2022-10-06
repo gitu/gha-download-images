@@ -135,7 +135,7 @@ func downloadFile(filepath string, url string) (err error) {
 	return nil
 }
 
-func findAndReplace(path string, find string, target string, replace, removeExif bool) (bool, error) {
+func findAndReplace(path string, find string, target string, replace, removeExifData bool) (bool, error) {
 	if find != target {
 		read, readErr := ioutil.ReadFile(path)
 		check(readErr)
@@ -150,7 +150,7 @@ func findAndReplace(path string, find string, target string, replace, removeExif
 			fmt.Println(v + "-->" + newTarget)
 			downloadErr := downloadFile(newTarget, v)
 			check(downloadErr)
-			if removeExif {
+			if removeExifData {
 				removeExif(newTarget)
 			}
 		}
@@ -176,7 +176,7 @@ func main() {
 	find, findErr := getenvStr("INPUT_FIND")
 	target, targetErr := getenvStr("INPUT_TARGET")
 	replace, replaceErr := getenvBool("INPUT_REPLACE")
-	removeExif, removeExifErr := getenvBool("INPUT_REMOVEEXIF")
+	removeExifData, removeExifErr := getenvBool("INPUT_REMOVEEXIF")
 
 	if findErr != nil {
 		panic(errors.New("gha-download-images: expected with.find to be a string"))
@@ -190,7 +190,7 @@ func main() {
 		replace = true
 	}
 	if removeExifErr != nil {
-		removeExif = false
+		removeExifData = false
 	}
 
 	files, filesErr := listFiles(include, exclude)
@@ -199,7 +199,7 @@ func main() {
 	modifiedCount := 0
 
 	for _, path := range files {
-		modified, findAndReplaceErr := findAndReplace(path, find, target, replace, removeExif)
+		modified, findAndReplaceErr := findAndReplace(path, find, target, replace, removeExifData)
 		check(findAndReplaceErr)
 
 		if modified {
