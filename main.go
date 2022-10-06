@@ -13,6 +13,7 @@ import (
 	"io"
 
 	"github.com/gobwas/glob"
+	"github.com/scottleedavis/go-exif-remove"
 )
 
 var ErrEnvVarEmpty = errors.New("getenv: environment variable empty")
@@ -76,6 +77,38 @@ func doesFileMatch(path string, include string, exclude string) bool {
 }
 
 
+func readFileWithoutExif(filepath string) ([]byte, error) {
+	data, err := ioutil.ReadFile(filepath)
+	if err != nil {
+		fmt.Printf(err.Error())
+		return nil, err
+	} 
+	if _, _, err := image.Decode(bytes.NewReader(data)); err != nil {
+		fmt.Printf("ERROR: original image is corrupt" + err.Error() + "\n")
+		return nil, err
+	}
+	filtered, err := exifremove.Remove(data)
+	if err != nil {
+		fmt.Printf("* " + err.Error() + "\n")
+		return nil, errors.New(err.Error())
+	}
+	if _, _, err = image.Decode(bytes.NewReader(filtered)); err != nil {
+		fmt.Printf("ERROR: filtered image is corrupt" + err.Error() + "\n")
+		return nil, err
+	}
+	return filtered, nil
+}
+
+func removeExif(path string) error {
+	b, err := readFileWithoutExif(path)
+	if err != nil {
+		fmt.Printf(err.Error())
+		return err
+	}
+	ioutil.WriteFile(path, b, 0644)
+	return nil
+}
+
 func downloadFile(filepath string, url string) (err error) {
 	out, err := os.Create(filepath)
 	if err != nil  {
@@ -100,7 +133,7 @@ func downloadFile(filepath string, url string) (err error) {
 	return nil
 }
 
-func findAndReplace(path string, find string, target string, replace bool) (bool, error) {
+func findAndReplace(path string, find string, target string, replace, removeExif bool) (bool, error) {
 	if find != target {
 		read, readErr := ioutil.ReadFile(path)
 		check(readErr)
@@ -115,6 +148,9 @@ func findAndReplace(path string, find string, target string, replace bool) (bool
 			fmt.Println(v + "-->" + newTarget)
 			downloadErr := downloadFile(newTarget, v)
 			check(downloadErr)
+			if removeExif {
+				removeExif(newTarget)
+			}
 		}
 
 		if replace {
@@ -138,6 +174,7 @@ func main() {
 	find, findErr := getenvStr("INPUT_FIND")
 	target, targetErr := getenvStr("INPUT_TARGET")
 	replace, replaceErr := getenvBool("INPUT_REPLACE")
+	removeExif, removeExifErr := getenvBool("INPUT_REMOVEEXIF")
 
 	if findErr != nil {
 		panic(errors.New("gha-download-images: expected with.find to be a string"))
@@ -150,6 +187,9 @@ func main() {
 	if replaceErr != nil {
 		replace = true
 	}
+	if removeExifErr != nil {
+		removeExif = false
+	}
 
 	files, filesErr := listFiles(include, exclude)
 	check(filesErr)
@@ -157,7 +197,7 @@ func main() {
 	modifiedCount := 0
 
 	for _, path := range files {
-		modified, findAndReplaceErr := findAndReplace(path, find, target, replace)
+		modified, findAndReplaceErr := findAndReplace(path, find, target, replace, removeExif)
 		check(findAndReplaceErr)
 
 		if modified {

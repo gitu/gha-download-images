@@ -22,9 +22,13 @@ inputs:
   replace:
     description: "also replace with target url in file - default is true"
     required: false
+  removeExif:
+    description: "renove exif data - default is false"
+    default: false
+    required: false
 outputs:
   modifiedFiles:
     description: "The number of files which a download has occured"
 runs:
   using: "docker"
-  image: "docker://ghcr.io/gitu/gha-download-images:v1.0.0"
+  image: "docker://ghcr.io/gitu/gha-download-images:v1.1.0"
